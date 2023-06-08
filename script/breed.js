@@ -26,21 +26,21 @@ renderBreedTable(breedArr);
  * render breed table data
  * @param breedArr array
  * */
-function renderBreedTable(breedArr) {
+function renderBreedTable(data) {
     tableBodyEl.innerHTML = "";
-    for (let i = 0; i < breedArr.length; i++) {
-        const breed = breedArr[i];
-        const row = document.createElement("tr");
-        row.innerHTML = `<tr><th scope="row">${breed.id}</th> \n\
-        <td>${breed.name}</td> \n\
-        <td>${breed.type}</td> \n\
-        <td><button type="button" class="btn btn-danger" onclick="deleteBreed('${
-            breed.id
-        }')">Delete</button> \n\
-        </td> \n\
-        </tr>`;
-        tableBodyEl.appendChild(row);
-    }
+    data.forEach((breed) => {
+        const row = `<tr>
+              <th scope="row">${breed.id}</th>
+              <td>${breed.name}</td>
+              <td>${breed.type}</td>
+              <td>
+                <button type="button" class="btn btn-danger" onclick="deleteBreed('${breed.id}')">
+                  Delete
+                </button>
+              </td>
+            </tr>`;
+        tableBodyEl.insertAdjacentHTML('beforeend', row);
+      });
 }
 
 /* clear input */
@@ -50,26 +50,21 @@ const clearInput = () => {
 };
 
 /* --submit form-- */
-submitBtn.addEventListener("click", function (e) {
-    // Find the highest existing breed ID
-    let maxId = 0;
-    breedArr.forEach(item => {
-        if (item.id > maxId) {
-            maxId = item.id;
+submitBtn.addEventListener("click", function (e) {    
+    if (validate) {        
+        const maxId = breedArr.reduce((max, item) => Math.max(max, item.id), 0); // Find the highest existing breed ID
+        const data = {
+            id: maxId + 1,
+            name: nameInput.value,
+            type: typeInput.value,
+        };
+        const validate = validateData(data);
+        if(validate){
+            breedArr.push(data);
+            saveToStorage("breedArr", JSON.stringify(breedArr))
+            clearInput();
+            renderBreedTable(breedArr);
         }
-    });
-    const data = {
-        id: maxId + 1,
-        name: nameInput.value,
-        type: typeInput.value,
-    };
-    const validate = validateData(data);
-    if (validate) {
-        breedArr.push(data);
-        console.log(breedArr)
-        saveToStorage("breedArr", JSON.stringify(breedArr))
-        clearInput();
-        renderBreedTable(breedArr);
     }
 });
 
@@ -78,9 +73,9 @@ submitBtn.addEventListener("click", function (e) {
  * @param breedId string
  * */
 const deleteBreed = (breedId) => {
-    // Confirm before deletePet
-    breedId = Number(breedId);
+    // Confirm before deletePet    
     if (confirm("Are you sure?")) {
+        breedId = Number(breedId);
         const index = breedArr.findIndex((breed) => breed.id === breedId);
         console.log(index);
         if (index !== -1) {

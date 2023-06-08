@@ -20,25 +20,44 @@ const updateData = (data) => {
         ...petMap.get(data.id),
         ...data
     });
-    saveToStorage("petArr", JSON.stringify([...petMap.values()]));
+    const breed = data.breed;
+    const type = data.type;
+    const idExists = breedArr.find((obj) => obj.name === breed && obj.type === type);
+    if(!idExists){
+        const maxId = breedArr.reduce((max, item) => Math.max(max, item.id), 0);
+        const breedOne = {
+            id: maxId + 1,
+            name: breed,
+            type: type,
+        };
+        breedArr.push(breedOne);        
+    }    
 }
-importDataBtn.addEventListener("click",function () {
-    console.log(inputFile.files);
+importDataBtn.addEventListener("click", async function () {    
     const file = inputFile.files[0];
     if (file) {
-        const reader = new FileReader();
-        reader.readAsText(file, "UTF-8");
-        reader.onload = function (evt) {
-            const result = JSON.parse(evt.target.result);
-            // for (let i = 0; i < result.length; i++) {
-            //     const pet = result[i];
-            //     updateData(pet);
-            // }
+        try {
+            const result = await readFile(file);
             result.forEach(updateData);
-            alert("Import finished")
-        }
-        reader.onerror = function (evt) {
-            alert("error reading file");
-        }
+            saveToStorage("breedArr", JSON.stringify(breedArr));
+            saveToStorage("petArr", JSON.stringify([...petMap.values()]));
+            alert("Import finished");
+          } catch (error) {
+            alert("Error reading file");
+          }
     }
 });
+
+function readFile(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsText(file, "UTF-8");
+      reader.onload = function (evt) {
+        const result = JSON.parse(evt.target.result);
+        resolve(result);
+      };
+      reader.onerror = function (evt) {
+        reject(evt);
+      };
+    });
+  }
