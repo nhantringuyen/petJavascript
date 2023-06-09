@@ -92,7 +92,7 @@ function renderTableData(petArr) {
     });
 }
 
-/* render  available table data */
+/* render  available table pet data */
 renderTableData(petArr);
 /* clear input */
 const clearInput = () => {

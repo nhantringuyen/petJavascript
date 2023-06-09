@@ -102,10 +102,7 @@ const clearInput = () => {
     dewormedInput.checked = false;
     sterilizedInput.checked = false;
 };
-/***
- * render table data
- * @param petArr array
- * */
+/* render table available pet data  */
 renderTableData(petArr);
 
 /***
